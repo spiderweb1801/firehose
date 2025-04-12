@@ -15,24 +15,24 @@ yum update -y
 yum install -y wget tar
 
 # Add splunk user
-useradd -m -s /bin/bash ${SPLUNK_USER}
+useradd -m -s /bin/bash $$SPLUNK_USER
 
 # Download and extract Splunk UF
 cd /opt
-wget -O splunkforwarder.tgz "${SPLUNK_DOWNLOAD_URL}"
+wget -O splunkforwarder.tgz "$$SPLUNK_DOWNLOAD_URL"
 tar -xvzf splunkforwarder.tgz
-chown -R ${SPLUNK_USER}:${SPLUNK_GROUP} splunkforwarder
+chown -R $$SPLUNK_USER:$$SPLUNK_GROUP splunkforwarder
 rm -f splunkforwarder.tgz
 
 # Accept license, enable boot-start, and start Splunk UF
-sudo -u ${SPLUNK_USER} ${SPLUNK_HOME}/bin/splunk start --accept-license --answer-yes --no-prompt
-sudo -u ${SPLUNK_USER} ${SPLUNK_HOME}/bin/splunk enable boot-start
+sudo -u $$SPLUNK_USER $$SPLUNK_HOME/bin/splunk start --accept-license --answer-yes --no-prompt
+sudo -u $$SPLUNK_USER $$SPLUNK_HOME/bin/splunk enable boot-start
 
 # Configure Forward Server
-sudo -u ${SPLUNK_USER} ${SPLUNK_HOME}/bin/splunk add forward-server ${SPLUNK_INDEXER}:${SPLUNK_INDEXER_PORT} -auth admin:${SPLUNK_ADMIN_PASS}
+sudo -u $$SPLUNK_USER $$SPLUNK_HOME/bin/splunk add forward-server $$SPLUNK_INDEXER:$$SPLUNK_INDEXER_PORT -auth admin:$$SPLUNK_ADMIN_PASS
 
 # Monitor /var/log
-sudo -u ${SPLUNK_USER} ${SPLUNK_HOME}/bin/splunk add monitor /var/log -auth admin:${SPLUNK_ADMIN_PASS}
+sudo -u $$SPLUNK_USER $$SPLUNK_HOME/bin/splunk add monitor /var/log -auth admin:$$SPLUNK_ADMIN_PASS
 
 # Restart Splunk Forwarder
-sudo -u ${SPLUNK_USER} ${SPLUNK_HOME}/bin/splunk restart
+sudo -u $$SPLUNK_USER $$SPLUNK_HOME/bin/splunk restart
