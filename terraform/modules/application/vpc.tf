@@ -41,7 +41,7 @@ resource "aws_subnet" "private_subnets" {
   }
 }
 
-resource "aws_route_table" "public_rt" {
+resource "aws_route_table" "public_rtb" {
   vpc_id = aws_vpc.main.id
 
   route {
@@ -57,7 +57,7 @@ resource "aws_route_table" "public_rt" {
 resource "aws_route_table_association" "public" {
   for_each       = aws_subnet.public_subnets
   subnet_id      = each.value.id
-  route_table_id = aws_route_table.public_rt.id
+  route_table_id = aws_route_table.public_rtb.id
 }
 
 resource "aws_eip" "nat" {
@@ -73,7 +73,7 @@ resource "aws_nat_gateway" "nat" {
   }
 }
 
-resource "aws_route_table" "private_rt" {
+resource "aws_route_table" "public_rtb" {
   vpc_id = aws_vpc.main.id
 
   route {
@@ -89,6 +89,6 @@ resource "aws_route_table" "private_rt" {
 resource "aws_route_table_association" "private" {
   for_each       = aws_subnet.private_subnets
   subnet_id      = each.value.id
-  route_table_id = aws_route_table.private_rt.id
+  route_table_id = aws_route_table.public_rtb.id
 }
 
