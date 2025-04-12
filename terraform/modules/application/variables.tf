@@ -39,7 +39,7 @@ variable "instance_config" {
     public_enabled = bool
   })
   default = {
-    cidr_range     = "10.0.0.0/16"
+    cidr_block    = "10.0.0.0/16"
     app_name       = "test"
     ami_id         = "ami-12313232"
     instance_type  = "t2.micro"
