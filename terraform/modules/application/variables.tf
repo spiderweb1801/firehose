@@ -30,7 +30,7 @@ locals {
 
 variable "instance_config" {
   type = object({
-    cidr_range   = string
+    cidr_block   = string
     app_name     = string
     ami_id    = string
     instance_type = string

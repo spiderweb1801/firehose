@@ -1,19 +1,19 @@
 variable "cidr" {
-  type = string
+  type    = string
   default = "10.0.1.0/24"
 }
 
 variable "app_name" {
-  type = string
-  default = "app-aps1"  
+  type    = string
+  default = "app-aps1"
 }
 
 variable "instance_type" {
-  type= string
+  type    = string
   default = "t3.micro"
 }
 
 variable "key_name" {
-  type= string
+  type    = string
   default = "aps1"
 }
