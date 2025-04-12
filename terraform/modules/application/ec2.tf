@@ -3,7 +3,7 @@ resource "aws_instance" "app_server" {
   instance_type = var.instance_config.instance_type
   key_name      = var.instance_config.key_name
   user_data     = var.instance_config.user_data
-  subnet_id              = var.instance_config.public_enabled ? aws_subnet.public_subnets.subnet1.id : aws_subnet.private_subnets.subnet1.id
+  subnet_id              = var.instance_config.public_enabled ? aws_subnet.public_subnets["subnet1"].id : aws_subnet.private_subnets["subnet1"].id
   root_block_device {
     volume_type = "gp3"
     volume_size = 30
