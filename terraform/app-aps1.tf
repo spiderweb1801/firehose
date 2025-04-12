@@ -25,7 +25,7 @@ data "aws_ami" "amazon_linux_gp3" {
 
   filter {
     name   = "name"
-    values = ["amzn2-ami-hvm-*-x86_64-gp3"]
+    values = ["amzn2-ami-hvm-*-x86_64-ebs"]
   }
 
   filter {
