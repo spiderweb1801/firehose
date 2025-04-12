@@ -19,6 +19,6 @@ data "template_file" "splunk_userdata" {
 
   vars = {
     indexer_port   = "9997"
-    admin_password = "changeme"             # Ideally pass via variable or secrets manager
+    admin_password = "changeme" # Ideally pass via variable or secrets manager
   }
 }
