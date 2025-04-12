@@ -14,23 +14,6 @@ module "splunk-aps1" {
   }
 }
 
-data "aws_ami" "amazon_linux_gp3" {
-  provider    = aws.aps1
-  most_recent = true
-  owners      = ["amazon"]
-
-  filter {
-    name   = "name"
-    values = ["amzn2-ami-hvm-*-x86_64-ebs"]
-  }
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-}
-
-
 data "template_file" "splunk_userdata" {
   template = file("${path.module}/scripts/splunk_userdata.sh.tftpl")
 

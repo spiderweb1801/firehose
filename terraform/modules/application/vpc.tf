@@ -73,7 +73,7 @@ resource "aws_nat_gateway" "nat" {
   }
 }
 
-resource "aws_route_table" "public_rtb" {
+resource "aws_route_table" "private_rtb" {
   vpc_id = aws_vpc.main.id
 
   route {
