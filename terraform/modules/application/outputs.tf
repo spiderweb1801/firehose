@@ -1,7 +1,7 @@
 output "network_details" {
     value = {
         vpc_id = aws_vpc.main.id
-        public_subnet_ids = [ for i, v in aws_subnet.public_subnets : i.id]
+        public_subnet_ids = [ for i in aws_subnet.public_subnets : i.id]
         private_subnet_ids = [ for i in aws_subnet.private_subnets : i.id]
         public_rtb  =   aws_route_table.public_rtb.id
         private_rtb  =   aws_route_table.private_rtb.id
