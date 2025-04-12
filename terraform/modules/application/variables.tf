@@ -36,7 +36,7 @@ variable "instance_config" {
     instance_type = string
     key_name = string
     user_data = string
-    public_enabled = boolean
+    public_enabled = bool
   })
   default = {
     cidr_range     = ""
