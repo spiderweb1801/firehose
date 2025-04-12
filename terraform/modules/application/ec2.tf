@@ -14,7 +14,7 @@ resource "aws_instance" "app_server" {
     Name = var.instance_config.app_name
   }
 
-  vpc_security_group_ids = [aws_security_group.nginx_sg.id]
+  vpc_security_group_ids = [aws_security_group.default_sg.id]
 }
 
 resource "aws_security_group" "default_sg" {
