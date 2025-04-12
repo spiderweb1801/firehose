@@ -1,6 +1,16 @@
 #!/bin/bash
 set -e
 
+# Update system
+yum update -y
+
+# Enable and install nginx from Amazon Linux extras
+amazon-linux-extras enable nginx1 -y
+yum clean metadata
+yum install -y nginx
+systemctl start nginx
+systemctl enable nginx
+
 # Variables
 SPLUNK_USER="splunk"
 SPLUNK_GROUP="splunk"
