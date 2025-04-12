@@ -4,7 +4,7 @@ module "app-aps1" {
     aws = aws.aps1
   }
   instance_config = {
-    cidr_block     = var.cidr
+    cidr_block     = var.app_cidr
     app_name       = var.app_name
     ami_id         = data.aws_ami.amazon_linux_gp3.id
     instance_type  = var.instance_type
