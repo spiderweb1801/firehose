@@ -1,0 +1,107 @@
+version: 2.1
+
+executors:
+  terraform-executor:
+    docker:
+      - image: hashicorp/terraform:1.6.3
+    resource_class: medium
+
+parameters:
+  deploy_infra:
+    type: boolean
+    default: false
+commands:
+  aws-authentication:
+    steps:
+      - run:
+          name: Authenticate with AWS OIDC
+          command: |
+            apk add --no-cache curl jq aws-cli
+            echo "${CIRCLE_OIDC_TOKEN}" > /tmp/token.jwt || true
+            export AWS_ROLE_ARN="arn:aws:iam::183631319967:role/sagar-oidc"
+            export AWS_WEB_IDENTITY_TOKEN_FILE="/tmp/token.jwt"
+
+            aws sts assume-role-with-web-identity \
+                  --role-arn "$AWS_ROLE_ARN" \
+                  --role-session-name "CircleCIJob" \
+                  --web-identity-token "$(cat $AWS_WEB_IDENTITY_TOKEN_FILE)" \
+                  --duration-seconds 3600 > /tmp/aws-credentials.json
+
+            AWS_ACCESS_KEY_ID=$(jq -r '.Credentials.AccessKeyId' /tmp/aws-credentials.json)
+            AWS_SECRET_ACCESS_KEY=$(jq -r '.Credentials.SecretAccessKey' /tmp/aws-credentials.json)
+            AWS_SESSION_TOKEN=$(jq -r '.Credentials.SessionToken' /tmp/aws-credentials.json)
+
+            if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ] || [ -z "$AWS_SESSION_TOKEN" ]; then
+              echo "ERROR: AWS credentials not retrieved properly"
+              exit 1
+            fi
+
+            echo "export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}" >> $BASH_ENV
+            echo "export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}" >> $BASH_ENV
+            echo "export AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}" >> $BASH_ENV
+            echo "export AWS_REGION=ap-south-1" >> $BASH_ENV
+            echo "export AWS_DEFAULT_REGION=ap-south-1" >> $BASH_ENV
+            source $BASH_ENV
+
+            aws sts get-caller-identity
+
+jobs:
+  
+  terraform-plan:
+    parameters:
+      terraform-filename:
+        type: string
+    executor: terraform-executor
+    working_directory: ~/<< parameters.terraform-filename >>
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - aws-authentication
+      - run:
+          name: Terraform Init
+          command: |
+            source $BASH_ENV
+            cd << parameters.terraform-filename >> && terraform init -backend-config=backend/dev
+      - run:
+          name: Terraform Plan
+          command: |
+            source $BASH_ENV
+            cd << parameters.terraform-filename >> && terraform plan
+            
+  terraform-apply:
+    parameters:
+      terraform-filename:
+        type: string
+    executor: terraform-executor
+    working_directory: ~/<< parameters.terraform-filename >>
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - aws-authentication
+      - run:
+          name: Terraform Init
+          command: |
+            source $BASH_ENV
+            cd << parameters.terraform-filename >> && terraform init -backend-config=backend/dev
+      - run:
+          name: Terraform Apply
+          command: |
+            source $BASH_ENV
+            cd << parameters.terraform-filename >> && terraform apply -auto-approve
+
+workflows:
+  terraform-deploy-app:
+    when: << pipeline.parameters.deploy_infra >>
+    jobs:
+      - terraform-plan:
+          terraform-filename: terraform
+      - terraform-apply-approval:
+          type: approval
+          requires:
+            - terraform-plan
+      - terraform-apply:
+          terraform-filename: terraform
+          requires:
+            - terraform-apply-approval
