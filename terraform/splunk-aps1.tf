@@ -56,7 +56,7 @@ resource "aws_lb_listener" "splunk_listener" {
   provider          = aws.aps1
   load_balancer_arn = aws_lb.splunk_nlb.arn
   port              = 8088
-  protocol          = TCP
+  protocol          = "TCP"
 
   default_action {
     type             = "forward"
