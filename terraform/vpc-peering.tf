@@ -16,8 +16,8 @@ resource "aws_route" "app_to_splunk" {
 }
 
 resource "aws_route" "splunk_to_app" {
-  for_each                  = [module.splunk-aps1.public_rtb, module.splunk-aps1.network_details.private_rtb]
+  for_each                  = { "pub-rtb"=module.splunk-aps1.network_details.public_rtb, "private-rtb"=module.splunk-aps1.network_details.private_rtb}
   route_table_id            = each.value
   destination_cidr_block    = var.app_cidr
-  vpc_peering_connection_id = aws_vpc_peering_connection.splunk_peering.id
+  vpc_peering_connection_id = aws_vpc_peering_connection.app_splunk_peering_aps1.id
 }
