@@ -11,12 +11,13 @@ module "splunk-aps1" {
     key_name       = var.key_name
     public_enabled = true
   }
-  #   ingress_rules = [
-  #     { from_port = 80, to_port = 80, protocol = "tcp", cidr_blocks = ["0.0.0.0/0"] },
-  #     { from_port = 443, to_port = 443, protocol = "tcp", cidr_blocks = ["0.0.0.0/0"] },
-  #     { from_port = 22, to_port = 22, protocol = "tcp", cidr_blocks = ["0.0.0.0/0"] },
-  #     { from_port = 8000, to_port = 8000, protocol = "tcp", cidr_blocks = ["0.0.0.0/0"] }
-  #   ]
+  ingress_rules = [
+    { from_port = 80, to_port = 80, protocol = "tcp", cidr_blocks = ["0.0.0.0/0"] },
+    { from_port = 443, to_port = 443, protocol = "tcp", cidr_blocks = ["0.0.0.0/0"] },
+    { from_port = 22, to_port = 22, protocol = "tcp", cidr_blocks = ["0.0.0.0/0"] },
+    { from_port = 8000, to_port = 8000, protocol = "tcp", cidr_blocks = ["0.0.0.0/0"] },
+    { from_port = 8088, to_port = 8088, protocol = "tcp", cidr_blocks = ["0.0.0.0/0"] }
+  ]
 }
 
 data "template_file" "splunk_userdata" {
@@ -52,14 +53,54 @@ resource "aws_lb_target_group_attachment" "splunk_instance" {
   port             = 8088
 }
 
-resource "aws_lb_listener" "splunk_listener" {
+# resource "aws_lb_listener" "splunk_listener" {
+#   provider          = aws.aps1
+#   load_balancer_arn = aws_lb.splunk_nlb.arn
+#   port              = 8088
+#   protocol          = "TCP"
+
+#   default_action {
+#     type             = "forward"
+#     target_group_arn = aws_lb_target_group.splunk_tg.arn
+#   }
+# }
+
+resource "aws_lb_listener" "splunk_tls_listener" {
   provider          = aws.aps1
   load_balancer_arn = aws_lb.splunk_nlb.arn
-  port              = 8088
-  protocol          = "TCP"
+  port              = 443
+  protocol          = "TLS"
+  ssl_policy        = "ELBSecurityPolicy-TLS-1-2-Ext-2018-06"
+  certificate_arn   = aws_acm_certificate_validation.splunk_cert_validation.certificate_arn
 
   default_action {
     type             = "forward"
     target_group_arn = aws_lb_target_group.splunk_tg.arn
   }
 }
+
+resource "aws_acm_certificate" "splunk_cert" {
+  provider          = aws.aps1
+  domain_name       = "splunk.internal.example.com"
+  validation_method = "DNS"
+  tags = {
+    Name = "splunk-acm"
+  }
+}
+
+resource "aws_route53_record" "splunk_cert_validation" {
+  provider = aws.aps1
+  zone_id  = aws_route53_zone.splunk_internal.zone_id
+
+  name    = aws_acm_certificate.splunk_cert.domain_validation_options[0].resource_record_name
+  type    = aws_acm_certificate.splunk_cert.domain_validation_options[0].resource_record_type
+  records = [aws_acm_certificate.splunk_cert.domain_validation_options[0].resource_record_value]
+  ttl     = 300
+}
+
+resource "aws_acm_certificate_validation" "splunk_cert_validation" {
+  provider                = aws.aps1
+  certificate_arn         = aws_acm_certificate.splunk_cert.arn
+  validation_record_fqdns = [aws_route53_record.splunk_cert_validation.fqdn]
+}
+
