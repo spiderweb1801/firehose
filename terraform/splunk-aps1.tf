@@ -105,7 +105,7 @@ resource "aws_lb_listener" "splunk_tls_listener" {
 # }
 
 resource "aws_acmpca_certificate_authority" "splunk_ca" {
-  type = "SUBORDINATE"
+  type = "ROOT"
 
   certificate_authority_configuration {
     key_algorithm     = "RSA_2048"
@@ -121,19 +121,42 @@ resource "aws_acmpca_certificate_authority" "splunk_ca" {
     }
   }
 
-  revocation_configuration {
-    crl_configuration {
-      enabled = false
-    }
-  }
-
   permanent_deletion_time_in_days = 7
 }
 
-resource "aws_acm_certificate" "splunk_internal_cert" {
-  domain_name       = "splunk.internal.example.com"
-  certificate_authority_arn = aws_acmpca_certificate_authority.splunk_ca.arn
-  validation_method = "NONE"
-}
+# resource "aws_acm_certificate" "splunk_internal_cert" {
+#   domain_name       = "splunk.internal.example.com"
+#   certificate_authority_arn = aws_acmpca_certificate_authority.splunk_ca.arn
+#   validation_method = "EMAIL"
+# }
 
+# resource "tls_private_key" "splunk_key" {
+#   algorithm = "RSA"
+#   rsa_bits  = 2048
+# }
 
+# resource "tls_cert_request" "splunk_csr" {
+#   key_algorithm   = "RSA"
+#   private_key_pem = tls_private_key.splunk_key.private_key_pem
+
+#   subject {
+#     common_name  = "splunk.internal.example.com"
+#     organization = "Splunk"
+#   }
+# }
+
+# resource "aws_acmpca_certificate" "splunk_cert" {
+#   certificate_authority_arn = aws_acmpca_certificate_authority.splunk_ca.arn
+#   certificate_signing_request = tls_cert_request.splunk_csr.cert_request_pem
+#   signing_algorithm = "SHA256WITHRSA"
+#   validity {
+#     type  = "DAYS"
+#     value = 365
+#   }
+# }
+
+# resource "aws_acm_certificate" "imported_cert" {
+#   private_key       = tls_private_key.splunk_key.private_key_pem
+#   certificate_body  = aws_acmpca_certificate.splunk_cert.certificate
+#   certificate_chain = aws_acmpca_certificate.splunk_cert.certificate_chain
+# }
