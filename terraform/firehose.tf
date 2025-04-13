@@ -1,4 +1,5 @@
 resource "aws_kinesis_firehose_delivery_stream" "splunk_stream" {
+  provider    = aws.aps1
   name        = "vpc-flowlogs-to-splunk"
   destination = "splunk"
 
@@ -27,7 +28,8 @@ resource "aws_kinesis_firehose_delivery_stream" "splunk_stream" {
 }
 
 resource "aws_s3_bucket" "backup" {
-  bucket = "firehose-backup-splunk-${random_id.rand.hex}"
+  provider = aws.aps1
+  bucket   = "firehose-backup-splunk-${random_id.rand.hex}"
 }
 
 resource "random_id" "rand" {
