@@ -9,18 +9,30 @@ resource "aws_vpc_peering_connection" "app_splunk_peering_aps1" {
   }
 }
 
-resource "aws_route" "app_to_splunk" {
+resource "aws_route" "app_to_splunk_pub" {
   provider                  = aws.aps1
-  for_each                  = { "pub-rtb" = module.app-aps1.network_details.public_rtb, "private-rtb" = module.app-aps1.network_details.private_rtb }
-  route_table_id            = each.value
+  route_table_id            = module.app-aps1.network_details.public_rtb
   destination_cidr_block    = var.splunk_cidr
   vpc_peering_connection_id = aws_vpc_peering_connection.app_splunk_peering_aps1.id
 }
 
-resource "aws_route" "splunk_to_app" {
+resource "aws_route" "app_to_splunk_private" {
   provider                  = aws.aps1
-  for_each                  = { "pub-rtb" = module.splunk-aps1.network_details.public_rtb, "private-rtb" = module.splunk-aps1.network_details.private_rtb }
-  route_table_id            = each.value
+  route_table_id            = module.app-aps1.network_details.private_rtb
+  destination_cidr_block    = var.splunk_cidr
+  vpc_peering_connection_id = aws_vpc_peering_connection.app_splunk_peering_aps1.id
+}
+
+resource "aws_route" "splunk_to_app_pub" {
+  provider                  = aws.aps1
+  route_table_id            = module.splunk-aps1.network_details.public_rtb
+  destination_cidr_block    = var.app_cidr
+  vpc_peering_connection_id = aws_vpc_peering_connection.app_splunk_peering_aps1.id
+}
+
+resource "aws_route" "splunk_to_app_private" {
+  provider                  = aws.aps1
+  route_table_id            = module.splunk-aps1.network_details.private_rtb
   destination_cidr_block    = var.app_cidr
   vpc_peering_connection_id = aws_vpc_peering_connection.app_splunk_peering_aps1.id
 }
