@@ -71,7 +71,7 @@ resource "aws_lb_listener" "splunk_tls_listener" {
   port              = 443
   protocol          = "TLS"
   ssl_policy        = "ELBSecurityPolicy-TLS-1-2-Ext-2018-06"
-  certificate_arn   = aws_acm_certificate_validation.splunk_cert_validation.certificate_arn
+  certificate_arn   = aws_acm_certificate.splunk_internal_cert.arn
 
   default_action {
     type             = "forward"
@@ -79,28 +79,61 @@ resource "aws_lb_listener" "splunk_tls_listener" {
   }
 }
 
-resource "aws_acm_certificate" "splunk_cert" {
-  provider          = aws.aps1
-  domain_name       = "splunk.internal.example.com"
-  validation_method = "DNS"
-  tags = {
-    Name = "splunk-acm"
+# resource "aws_acm_certificate" "splunk_cert" {
+#   provider          = aws.aps1
+#   domain_name       = "splunk.internal.example.com"
+#   validation_method = "DNS"
+#   tags = {
+#     Name = "splunk-acm"
+#   }
+# }
+
+# resource "aws_route53_record" "splunk_cert_validation" {
+#   provider = aws.aps1
+#   zone_id  = aws_route53_zone.splunk_internal.zone_id
+
+#   name    = tolist(aws_acm_certificate.splunk_cert.domain_validation_options)[0].resource_record_name
+#   type    = tolist(aws_acm_certificate.splunk_cert.domain_validation_options)[0].resource_record_type
+#   records = [tolist(aws_acm_certificate.splunk_cert.domain_validation_options)[0].resource_record_value]
+#   ttl     = 300
+# }
+
+# resource "aws_acm_certificate_validation" "splunk_cert_validation" {
+#   provider                = aws.aps1
+#   certificate_arn         = aws_acm_certificate.splunk_cert.arn
+#   validation_record_fqdns = [aws_route53_record.splunk_cert_validation.fqdn]
+# }
+
+resource "aws_acmpca_certificate_authority" "splunk_ca" {
+  type = "SUBORDINATE"
+
+  certificate_authority_configuration {
+    key_algorithm     = "RSA_2048"
+    signing_algorithm = "SHA256WITHRSA"
+
+    subject {
+      common_name         = "splunk.internal.example.com"
+      organization        = "Splunk"
+      organizational_unit = "IT"
+      country             = "IN"
+      state               = "Delhi"
+      locality            = "New Delhi"
+    }
   }
+
+  revocation_configuration {
+    crl_configuration {
+      enabled = false
+    }
+  }
+
+  permanent_deletion_time_in_days = 7
 }
 
-resource "aws_route53_record" "splunk_cert_validation" {
-  provider = aws.aps1
-  zone_id  = aws_route53_zone.splunk_internal.zone_id
-
-  name    = tolist(aws_acm_certificate.splunk_cert.domain_validation_options)[0].resource_record_name
-  type    = tolist(aws_acm_certificate.splunk_cert.domain_validation_options)[0].resource_record_type
-  records = [tolist(aws_acm_certificate.splunk_cert.domain_validation_options)[0].resource_record_value]
-  ttl     = 300
+resource "aws_acm_certificate" "splunk_internal_cert" {
+  domain_name       = "splunk.internal.example.com"
+  certificate_authority_arn = aws_acmpca_certificate_authority.splunk_ca.arn
+  validation_method = "NONE"
 }
 
-resource "aws_acm_certificate_validation" "splunk_cert_validation" {
-  provider                = aws.aps1
-  certificate_arn         = aws_acm_certificate.splunk_cert.arn
-  validation_record_fqdns = [aws_route53_record.splunk_cert_validation.fqdn]
-}
 
