@@ -33,20 +33,11 @@ variable "instance_config" {
     cidr_block   = string
     app_name     = string
     ami_id    = string
-    instance_type = string
+    instance_type = optional(string,"t2.micro")
     key_name = string
-    user_data = string
-    public_enabled = bool
+    user_data = optional(string)
+    public_enabled = optional(bool,false)
   })
-  default = {
-    cidr_block    = "10.0.0.0/16"
-    app_name       = "test"
-    ami_id         = "ami-12313232"
-    instance_type  = "t2.micro"
-    key_name       = "test"
-    user_data      = "data"
-    public_enabled = false
-  }
 }
 
 variable "ingress_rules" {
@@ -57,9 +48,7 @@ variable "ingress_rules" {
     cidr_blocks = list(string)
   }))
   default = [
-    { from_port = 80, to_port = 80, protocol = "tcp", cidr_blocks = ["0.0.0.0/0"] },
-    { from_port = 443, to_port = 443, protocol = "tcp", cidr_blocks = ["0.0.0.0/0"] },
-    { from_port = 22, to_port = 22, protocol = "tcp", cidr_blocks = ["0.0.0.0/0"] }
+    { from_port = 0, to_port = 0, protocol = "-1", cidr_blocks = ["0.0.0.0/0"] }
   ]
 }
 
