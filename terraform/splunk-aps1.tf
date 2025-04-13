@@ -71,7 +71,7 @@ resource "aws_lb_listener" "splunk_tls_listener" {
   port              = 443
   protocol          = "TLS"
   ssl_policy        = "ELBSecurityPolicy-TLS-1-2-Ext-2018-06"
-  certificate_arn   = aws_acm_certificate.splunk_internal_cert.arn
+  certificate_arn   = "arn:aws:acm:ap-south-1:183631319967:certificate/1027cb1c-eb9d-4e20-b17c-dc290ebc3639"
 
   default_action {
     type             = "forward"
@@ -79,84 +79,3 @@ resource "aws_lb_listener" "splunk_tls_listener" {
   }
 }
 
-# resource "aws_acm_certificate" "splunk_cert" {
-#   provider          = aws.aps1
-#   domain_name       = "splunk.internal.example.com"
-#   validation_method = "DNS"
-#   tags = {
-#     Name = "splunk-acm"
-#   }
-# }
-
-# resource "aws_route53_record" "splunk_cert_validation" {
-#   provider = aws.aps1
-#   zone_id  = aws_route53_zone.splunk_internal.zone_id
-
-#   name    = tolist(aws_acm_certificate.splunk_cert.domain_validation_options)[0].resource_record_name
-#   type    = tolist(aws_acm_certificate.splunk_cert.domain_validation_options)[0].resource_record_type
-#   records = [tolist(aws_acm_certificate.splunk_cert.domain_validation_options)[0].resource_record_value]
-#   ttl     = 300
-# }
-
-# resource "aws_acm_certificate_validation" "splunk_cert_validation" {
-#   provider                = aws.aps1
-#   certificate_arn         = aws_acm_certificate.splunk_cert.arn
-#   validation_record_fqdns = [aws_route53_record.splunk_cert_validation.fqdn]
-# }
-
-resource "aws_acmpca_certificate_authority" "splunk_ca" {
-  type = "ROOT"
-
-  certificate_authority_configuration {
-    key_algorithm     = "RSA_2048"
-    signing_algorithm = "SHA256WITHRSA"
-
-    subject {
-      common_name         = "splunk.internal.example.com"
-      organization        = "Splunk"
-      organizational_unit = "IT"
-      country             = "IN"
-      state               = "Delhi"
-      locality            = "New Delhi"
-    }
-  }
-
-  permanent_deletion_time_in_days = 7
-}
-
-# resource "aws_acm_certificate" "splunk_internal_cert" {
-#   domain_name       = "splunk.internal.example.com"
-#   certificate_authority_arn = aws_acmpca_certificate_authority.splunk_ca.arn
-#   validation_method = "EMAIL"
-# }
-
-# resource "tls_private_key" "splunk_key" {
-#   algorithm = "RSA"
-#   rsa_bits  = 2048
-# }
-
-# resource "tls_cert_request" "splunk_csr" {
-#   key_algorithm   = "RSA"
-#   private_key_pem = tls_private_key.splunk_key.private_key_pem
-
-#   subject {
-#     common_name  = "splunk.internal.example.com"
-#     organization = "Splunk"
-#   }
-# }
-
-# resource "aws_acmpca_certificate" "splunk_cert" {
-#   certificate_authority_arn = aws_acmpca_certificate_authority.splunk_ca.arn
-#   certificate_signing_request = tls_cert_request.splunk_csr.cert_request_pem
-#   signing_algorithm = "SHA256WITHRSA"
-#   validity {
-#     type  = "DAYS"
-#     value = 365
-#   }
-# }
-
-# resource "aws_acm_certificate" "imported_cert" {
-#   private_key       = tls_private_key.splunk_key.private_key_pem
-#   certificate_body  = aws_acmpca_certificate.splunk_cert.certificate
-#   certificate_chain = aws_acmpca_certificate.splunk_cert.certificate_chain
-# }
