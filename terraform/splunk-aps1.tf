@@ -40,7 +40,7 @@ resource "aws_lb_target_group" "splunk_tg" {
   provider    = aws.aps1
   name        = "splunk-tg"
   port        = 8088
-  protocol    = TCP
+  protocol    = "TCP"
   vpc_id      = module.splunk-aps1.network_details.vpc_id
   target_type = "instance"
 }
