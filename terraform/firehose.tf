@@ -3,7 +3,7 @@ resource "aws_kinesis_firehose_delivery_stream" "splunk_stream" {
   destination = "splunk"
 
   splunk_configuration {
-    hec_endpoint               = "http://${module.splunk-aps1.ec2_details.ec2_public_ip}:8000"
+    hec_endpoint               = "http://${module.splunk-aps1.ec2_details.ec2_private_ip}:8000"
     hec_token                  = var.splunk_hec_token
     hec_acknowledgment_timeout = 600
     hec_endpoint_type          = "Event"
