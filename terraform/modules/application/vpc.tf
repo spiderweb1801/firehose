@@ -49,11 +49,11 @@ resource "aws_route_table" "public_rtb" {
   }
 }
 
-# resource "aws_route" "route_to_internet" {
-#   route_table_id            = aws_route_table.public_rtb.id
-#   destination_cidr_block    = "0.0.0.0/0"
-#   gateway_id = aws_internet_gateway.igw.id
-# }
+resource "aws_route" "route_to_internet" {
+  route_table_id            = aws_route_table.public_rtb.id
+  destination_cidr_block    = "0.0.0.0/0"
+  gateway_id = aws_internet_gateway.igw.id
+}
 
 resource "aws_route_table_association" "public" {
   for_each       = aws_subnet.public_subnets
@@ -82,11 +82,11 @@ resource "aws_route_table" "private_rtb" {
   }
 }
 
-# resource "aws_route" "route_to_pub" {
-#   route_table_id            = aws_route_table.private_rtb.id
-#   destination_cidr_block    = "0.0.0.0/0"
-#   gateway_id = aws_nat_gateway.nat.id
-# }
+resource "aws_route" "route_to_pub" {
+  route_table_id            = aws_route_table.private_rtb.id
+  destination_cidr_block    = "0.0.0.0/0"
+  gateway_id = aws_nat_gateway.nat.id
+}
 
 resource "aws_route_table_association" "private" {
   for_each       = aws_subnet.private_subnets
