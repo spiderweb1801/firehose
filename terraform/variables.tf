@@ -13,6 +13,12 @@ variable "app_name" {
   default = "app-aps1"
 }
 
+variable "splunk_hec_token" {
+  type      = string
+  default   = "0bada992-7be8-4cb4-b805-e9cd22038f69"
+  sensitive = true
+}
+
 variable "instance_type" {
   type    = string
   default = "t3.medium"
