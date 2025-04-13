@@ -92,9 +92,9 @@ resource "aws_route53_record" "splunk_cert_validation" {
   provider = aws.aps1
   zone_id  = aws_route53_zone.splunk_internal.zone_id
 
-  name    = aws_acm_certificate.splunk_cert.domain_validation_options[0].resource_record_name
-  type    = aws_acm_certificate.splunk_cert.domain_validation_options[0].resource_record_type
-  records = [aws_acm_certificate.splunk_cert.domain_validation_options[0].resource_record_value]
+  name    = tolist(aws_acm_certificate.splunk_cert.domain_validation_options)[0].resource_record_name
+  type    = tolist(aws_acm_certificate.splunk_cert.domain_validation_options)[0].resource_record_type
+  records = [tolist(aws_acm_certificate.splunk_cert.domain_validation_options)[0].resource_record_value]
   ttl     = 300
 }
 
