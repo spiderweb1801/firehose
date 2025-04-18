@@ -115,7 +115,7 @@ jobs:
    
 workflows:
   terraform-deploy-app:
-    # when: << pipeline.parameters.deploy_infra >>
+    when: << pipeline.parameters.deploy_infra >>
     jobs:
       - terraform-plan:
           terraform-filename: terraform
