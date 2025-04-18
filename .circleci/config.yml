@@ -6,10 +6,10 @@ executors:
       - image: hashicorp/terraform:1.6.3
     resource_class: medium
 
-# parameters:
-#   deploy_infra:
-#     type: boolean
-#     default: false
+parameters:
+  deploy_infra:
+    type: boolean
+    default: false
 commands:
   aws-authentication:
     steps:
