@@ -15,7 +15,7 @@ variable "app_name" {
 
 variable "splunk_hec_token" {
   type      = string
-  default   = "0bada992-7be8-4cb4-b805-e9cd22038f69"
+  default   = "e6cb5bbc-8138-47c5-b146-e7f78f508fdc"
   sensitive = true
 }
 

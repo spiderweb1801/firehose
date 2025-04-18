@@ -91,6 +91,28 @@ jobs:
             source $BASH_ENV
             cd << parameters.terraform-filename >> && terraform apply -auto-approve
 
+  terraform-destroy:
+      parameters:
+        terraform-filename:
+          type: string
+      executor: terraform-executor
+      working_directory: ~/<< parameters.terraform-filename >>
+      steps:
+        - checkout
+        - attach_workspace:
+            at: .
+        - aws-authentication
+        - run:
+            name: Terraform Init
+            command: |
+              source $BASH_ENV
+              cd << parameters.terraform-filename >> && terraform init -backend-config=backend/dev
+        - run:
+            name: Terraform Destroy
+            command: |
+              source $BASH_ENV
+              cd << parameters.terraform-filename >> && terraform destroy -auto-approve
+   
 workflows:
   terraform-deploy-app:
     # when: << pipeline.parameters.deploy_infra >>
@@ -105,3 +127,8 @@ workflows:
           terraform-filename: terraform
           requires:
             - terraform-apply-approval
+
+  terraform-destroy-app:
+    jobs:
+      - terraform-destroy:
+          terraform-filename: terraform
